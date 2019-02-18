@@ -1,38 +1,31 @@
-const express = require('express');
-const bodyParser = require('body-parser');
-const path = require('path');
-const app = express();
-const morgan = require('morgan');
-const router = require('./router')
+'use strict'
 
-module.exports = app;
-app.use('/api', router);
+const app = require('./app')
 
-app.use('/', express.static(path.join(__dirname, "/public")));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(morgan('dev'));
+const port = process.env.PORT || 3000
 
+let server
+async function startup() {
+    if (process.env.NODE_ENV !== 'production') {
+        console.log('Starting server...')
+    }
 
+    server = app.listen(port, () => {
+        if (process.env.NODE_ENV !== 'production') {
+            console.log('Server started')
+        }
+    })
+}
 
-app.use('/', function(req, res, next){
-   if (req.url === '/forbidden') {
-        next({
-          status: 403,
-          message: 'forbidden'});
-    } else if(req.url === '/broken'){
-        next({
-          status: 500,
-          message: 'Internal Server Error'});
-  }
+startup()
+
+process.on('unhandledRejection', async (reason, location) => {
+    const err = { reason, location }
+    console.error(err)
 })
 
-//------Error handling middleware-------------//
-app.use(function(err, req, res, next){
-  console.error(err)
-  res.status(err.status || 500).send(err.message || 'Internal Server Error')
+process.on('SIGTERM', () => {
+    server.close(() => {
+        process.exit(0)
+    })
 })
-
-app.listen(3000, () => {
-    console.log("Server running on port 3000");
-});
