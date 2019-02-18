@@ -1,5 +1,5 @@
 const db = require('../db/db')
 
 module.exports = () => {
-    return
+    return db
 }

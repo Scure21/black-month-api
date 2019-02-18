@@ -1,7 +1,7 @@
 const db = require('../db/db')
 
 module.exports = () => {
-    const answerCount = 6
+    const answerCount = 2
     const answers = []
     const possibleAnswers = db
     for (let i = 0; i < answerCount; i++) {
